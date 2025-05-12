@@ -1,21 +1,39 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import {OGREMarketEnums} from "../libraries/Enums.sol";
-
 /**
- * @notice OGREMarket interface definition
+ * @notice OGRE Market Interface
  */
 interface IOGREMarket {
 
     //========== Definitions ==========
+
+    /**
+     * ASK:
+     * BID:
+     */
+    enum OrderType {
+        ASK,
+        BID
+    }
+
+    /**
+     * ERC20:
+     * ERC721:
+     * ERC1155:
+     */
+    enum ContractType {
+        ERC20,
+        ERC721,
+        ERC1155
+    }
 
     struct ConstructorParams {
         address daoAddress;
     }
 
     struct Order {
-        OGREMarketEnums.OrderType orderType;
+        OrderType orderType;
         address creator;
         address erc721Address;
         uint256 tokenId;
@@ -27,7 +45,7 @@ interface IOGREMarket {
     }
 
     struct AdvancedOrder {
-        OGREMarketEnums.OrderType orderType;
+        OrderType orderType;
         address creator;
         address erc721Address;
         uint256 tokenId;
@@ -65,7 +83,7 @@ interface IOGREMarket {
     //========== Functions ==========
 
     function allowedContracts(address contractAddress) external view returns (bool);
-    function createOrder(OGREMarketEnums.OrderType orderType, address erc721Address, uint256 tokenId, address erc20Address, uint256 amount) external payable;
+    function createOrder(OrderType orderType, address erc721Address, uint256 tokenId, address erc20Address, uint256 amount) external payable;
     function orderExists(bytes32 orderHash) external view returns (bool);
     function calcOrderHash(address erc721Address, uint256 tokenId, address erc20Address, uint256 amount) external pure returns (bytes32);
     function calcItemHash(address erc721Address, uint256 tokenId) external pure returns (bytes32);
