@@ -2,6 +2,8 @@
 
 A smart contract suite for actionable governance within NFT communities.
 
+<img src="media/OGRELogo.png" alt="OGRE Logo" width="100"/>
+
 # TODO
 
 * access control. onlySelf?
