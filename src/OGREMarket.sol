@@ -13,7 +13,7 @@ import {IOGREMarket} from "./interfaces/IOGREMarket.sol";
 //TODO: add order recipient
 
 /**
- * @title OGRE Market Contract
+ * @title Open Governance Referendum Engine Market Contract
  */
 contract OGREMarket is IOGREMarket, AccessControl, ReentrancyGuard {
 

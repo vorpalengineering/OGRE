@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 /**
- * @notice OGRE Proposal Factory interface definition
+ * @notice Open Governance Referendum Engine Proposal Factory Interface
  */
 interface IOGREProposalFactory {
     function produceOGREProposal(string memory title, address daoAddress, address owner) external returns (address);

@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./interfaces/IOGREDAO.sol";
-import {OGREProposalEnums} from "./libraries/Enums.sol";
 import {IActionHopper} from "./interfaces/IActionHopper.sol";
 import {IOGREProposal} from "./interfaces/IOGREProposal.sol";
 import {IOGREDAO} from "./interfaces/IOGREDAO.sol";
@@ -22,7 +21,7 @@ contract OGREProposal is Ownable {
     bool public revotable; //allows members to change their votes during voting period
     string public proposalURI; //metadata link to information about proposal
     
-    OGREProposalEnums.ProposalStatus public status; //proposed, cancelled, failed, passed, executed (cancelled, failed, and executed are terminal states)
+    IOGREProposal.ProposalStatus public status; //proposed, cancelled, failed, passed, executed (cancelled, failed, and executed are terminal states)
     uint256 public startTime; //start of vote period (unix timestamp)
     uint256 public endTime; //end of vote period (unix timestamp)
     uint256 public voteCount; //number of tokens that have cast a vote
@@ -38,7 +37,7 @@ contract OGREProposal is Ownable {
      * @param previousStatus previous status of proposal
      * @param newStatus new status of proposal
      */
-    event StatusUpdated(OGREProposalEnums.ProposalStatus previousStatus, OGREProposalEnums.ProposalStatus newStatus);
+    event StatusUpdated(IOGREProposal.ProposalStatus previousStatus, IOGREProposal.ProposalStatus newStatus);
 
     /**
      * @notice Logs a vote.
@@ -46,7 +45,7 @@ contract OGREProposal is Ownable {
      * @param tokenId id of nft token granting vote
      * @param vote direction of vote (0 = NO, 1 = YES, 2 = ABSTAIN)
      */
-    event VoteCast(address voter, uint256 tokenId, OGREProposalEnums.VoteDirection vote);
+    event VoteCast(address voter, uint256 tokenId, IOGREProposal.VoteDirection vote);
 
     /**
      * @notice Logs a successful evaluation of proposal results.
@@ -59,9 +58,9 @@ contract OGREProposal is Ownable {
     //========== Errors ==========
 
     error InvalidAddress(string variableName, address value);
-    error InvalidProposalStatus(OGREProposalEnums.ProposalStatus currentStatus, OGREProposalEnums.ProposalStatus requiredStatus);
+    error InvalidProposalStatus(IOGREProposal.ProposalStatus currentStatus, IOGREProposal.ProposalStatus requiredStatus);
     error InvalidMemberStatus(IOGREDAO.MemberStatus currentStatus, IOGREDAO.MemberStatus requiredStatus);
-    error InvalidVoteDirection(OGREProposalEnums.VoteDirection vote);
+    error InvalidVoteDirection(IOGREProposal.VoteDirection vote);
     error InvalidTokenOwner(uint256 tokenId, address owner);
     error StartTimeInPast();
     error EndTimeBeforeStartTime();
@@ -83,7 +82,7 @@ contract OGREProposal is Ownable {
         revotable = _params_.revotable;
         proposalURI = _params_.proposalURI;
 
-        emit StatusUpdated(OGREProposalEnums.ProposalStatus.PROPOSED, OGREProposalEnums.ProposalStatus.PROPOSED);
+        emit StatusUpdated(IOGREProposal.ProposalStatus.PROPOSED, IOGREProposal.ProposalStatus.PROPOSED);
     }
 
     //========== Modifiers ==========
@@ -191,15 +190,15 @@ contract OGREProposal is Ownable {
      * @param tokenId id of token casting votes
      * @param vote number representing vote (0 = NO, 1 = YES, 2 = ABSTAIN)
      */
-    function castVote(uint256 tokenId, OGREProposalEnums.VoteDirection vote) public {
+    function castVote(uint256 tokenId, IOGREProposal.VoteDirection vote) public {
         //validate
-        if (status != OGREProposalEnums.ProposalStatus.PROPOSED) revert InvalidProposalStatus(status, OGREProposalEnums.ProposalStatus.PROPOSED);
+        if (status != IOGREProposal.ProposalStatus.PROPOSED) revert InvalidProposalStatus(status, IOGREProposal.ProposalStatus.PROPOSED);
         if (IOGREDAO(daoAddress).getMemberStatus(tokenId) != IOGREDAO.MemberStatus.REGISTERED) {
             revert InvalidMemberStatus(IOGREDAO(daoAddress).getMemberStatus(tokenId), IOGREDAO.MemberStatus.REGISTERED);
         }
         address nftAddress = IOGREDAO(daoAddress).nftAddress();
         if (IERC721(nftAddress).ownerOf(tokenId) != msg.sender) revert InvalidTokenOwner(tokenId, msg.sender);
-        if (vote > OGREProposalEnums.VoteDirection(2)) revert InvalidVoteDirection(vote);
+        if (vote > IOGREProposal.VoteDirection(2)) revert InvalidVoteDirection(vote);
         require(block.timestamp >= startTime, "must be after start time");
         require(block.timestamp <= endTime, "must be before end time");
 
@@ -235,10 +234,10 @@ contract OGREProposal is Ownable {
      * @dev Cancels proposal.
      */
     function cancelProposal() public onlyOwner {
-        if (status != OGREProposalEnums.ProposalStatus.PROPOSED) {
-            revert InvalidProposalStatus(status, OGREProposalEnums.ProposalStatus.PROPOSED);
+        if (status != IOGREProposal.ProposalStatus.PROPOSED) {
+            revert InvalidProposalStatus(status, IOGREProposal.ProposalStatus.PROPOSED);
         }
-        _updateStatus(OGREProposalEnums.ProposalStatus.CANCELLED);
+        _updateStatus(IOGREProposal.ProposalStatus.CANCELLED);
     }
 
     /**
@@ -263,7 +262,7 @@ contract OGREProposal is Ownable {
      * @dev Updates proposal status.
      * @param newStatus new status of proposal
      */
-    function _updateStatus(OGREProposalEnums.ProposalStatus newStatus) internal {
+    function _updateStatus(IOGREProposal.ProposalStatus newStatus) internal {
         emit StatusUpdated(status, newStatus);
         status = newStatus;
     }

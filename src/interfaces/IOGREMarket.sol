@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 /**
- * @notice OGRE Market Interface
+ * @notice Open Governance Referendum Engine Market Interface
  */
 interface IOGREMarket {
 

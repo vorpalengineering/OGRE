@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 /**
- * @title OGRE Factory Abstract Contract
+ * @title Open Governance Referendum Engine Factory Abstract Contract
  */
 abstract contract OGREFactory {
 

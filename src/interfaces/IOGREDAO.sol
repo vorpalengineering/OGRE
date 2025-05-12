@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 /**
- * @notice OGRE DAO Interface
+ * @notice Open Governance Referendum Engine DAO Interface
  */
 interface IOGREDAO {
 

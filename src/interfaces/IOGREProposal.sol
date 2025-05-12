@@ -1,15 +1,41 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import {OGREProposalEnums} from "../libraries/Enums.sol";
 import {IActionHopper} from "./IActionHopper.sol";
 
 /**
- * @notice OGRE proposal interface definition
+ * @notice Open Governance Referendum Engine Proposal Interface
  */
 interface IOGREProposal {
 
     //========== Definitions ==========
+
+    /**
+     * Proposal Status Flow:
+     *     PROPOSED - CANCELLED
+     *        |    \
+     *      PASSED  FAILED
+     *        |
+     *     EXECUTED
+     */
+    enum ProposalStatus {
+        PROPOSED,
+        CANCELLED,
+        FAILED,
+        PASSED,
+        EXECUTED
+    }
+
+    /**
+     * NO:
+     * YES:
+     * ABSTAIN:
+     */
+    enum VoteDirection {
+        NO,
+        YES,
+        ABSTAIN
+    }
 
     struct ConstructorParams {
         bool revotable;
@@ -19,14 +45,14 @@ interface IOGREProposal {
     }
 
     struct Vote {
-        OGREProposalEnums.VoteDirection direction;
+        VoteDirection direction;
         bool voted;
     }
 
     //========== Functions ==========
 
     function proposalTitle() external view returns (string memory);
-    function status() external view returns (OGREProposalEnums.ProposalStatus);
+    function status() external view returns (ProposalStatus);
     function startTime() external view returns (uint256);
     function endTime() external view returns (uint256);
     function voteTotals(uint256 vote) external view returns (uint256);

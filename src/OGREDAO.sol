@@ -243,7 +243,7 @@ contract OGREDAO is IOGREDAO, ActionHopper {
      */
     function evaluateProposal(address proposal) public returns (bool) {
         if (!isProposal(proposal)) revert ProposalNotRecognized();
-        if (IOGREProposal(proposal).status() != OGREProposalEnums.ProposalStatus.PROPOSED) revert InvalidProposalState();
+        if (IOGREProposal(proposal).status() != IOGREProposal.ProposalStatus.PROPOSED) revert InvalidProposalState();
         if (IOGREProposal(proposal).startTime() == 0) revert InvalidProposalState();
         if (block.timestamp <= IOGREProposal(proposal).endTime()) revert VotePeriodNotEnded();
 
@@ -294,7 +294,7 @@ contract OGREDAO is IOGREDAO, ActionHopper {
      */
     function executeProposal(address proposal) public {
         if (!isProposal(proposal)) revert ProposalNotRecognized();
-        if (IOGREProposal(proposal).status() != OGREProposalEnums.ProposalStatus.PASSED) revert InvalidProposalState();
+        if (IOGREProposal(proposal).status() != IOGREProposal.ProposalStatus.PASSED) revert InvalidProposalState();
         if (IOGREProposal(proposal).getActionCount() == 0) revert NoActionsToExecute();
 
         //set proposal status to executed

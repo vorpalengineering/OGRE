@@ -245,7 +245,7 @@ contract OGREDAOTest is Test {
         // Cast votes on proposalContract
         for (uint256 i = 0; i < 10; i++) {
             vm.prank(user0);
-            proposalContract.castVote(i, OGREProposalEnums.VoteDirection.YES); // yes vote
+            proposalContract.castVote(i, IOGREProposal.VoteDirection.YES); // yes vote
         }
 
         // Advance network time
