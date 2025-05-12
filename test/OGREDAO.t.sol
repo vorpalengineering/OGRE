@@ -3,10 +3,10 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import "../src/OGREDAO.sol";
-import "../src/samples/SampleERC721.sol";
 import "../src/OGREProposal.sol";
 import "../src/factories/OGREProposalFactory.sol";
-import "../src/samples/SampleERC20.sol";
+import "./sample/SampleERC721.sol";
+import "./sample/SampleERC20.sol";
 import {IOGREDAO} from "../src/interfaces/IOGREDAO.sol";
 
 contract OGREDAOTest is Test {
