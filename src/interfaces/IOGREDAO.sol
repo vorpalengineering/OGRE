@@ -1,14 +1,34 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import {OGREDAOEnums} from "../libraries/Enums.sol";
-
 /**
- * @notice OGRE DAO interface definition
+ * @notice OGRE DAO Interface
  */
 interface IOGREDAO {
 
     //========== Definitions ==========
+
+    /**
+     * UNREGISTERED: member has not registered, or elected to unregister after previously being registered
+     * REGISTERED: member is registered
+     * BANNED: member has been banned and cannot be registered again
+     */
+    enum MemberStatus {
+        UNREGISTERED,
+        REGISTERED,
+        BANNED
+    }
+
+    /**
+     * OPEN: any nft holder can self-register as a member
+     * INVITE: only dao members can register a member
+     * PRIVATE: only dao can register a member
+     */
+    enum AccessType {
+        OPEN,
+        INVITE,
+        PRIVATE
+    }
 
     struct ConstructorParams {
         address parentDAO;
@@ -35,7 +55,7 @@ interface IOGREDAO {
     function minVoteDuration() external view returns (uint256);
 
     function memberCount() external view returns (uint256);
-    function getMemberStatus(uint256 tokenId) external view returns (OGREDAOEnums.MemberStatus);
+    function getMemberStatus(uint256 tokenId) external view returns (MemberStatus);
 
     function proposalCount() external view returns (uint256);
     function proposals(uint256) external view returns (address);

@@ -9,8 +9,9 @@ import "./interfaces/IOGREProposal.sol";
 import "./abstract/ActionHopper.sol";
 
 import {Constants} from "./libraries/Constants.sol";
-import {OGREDAOEnums} from "./libraries/Enums.sol";
 import {IOGREDAO} from "./interfaces/IOGREDAO.sol";
+
+//TODO: if nftAddress is zero address then deploy a new ERC721 contract
 
 /**
  * @title Open Governance Referendum Engine DAO Contract
@@ -21,7 +22,7 @@ import {IOGREDAO} from "./interfaces/IOGREDAO.sol";
  *         and unregistering members. It also manages the creation and evaluation of proposals.
  *         DAO members may create proposals that may include actions to be executed if the proposal is approved.
  */
-contract OGREDAO is ActionHopper {
+contract OGREDAO is IOGREDAO, ActionHopper {
 
     //========== State ==========
 
@@ -36,7 +37,7 @@ contract OGREDAO is ActionHopper {
     uint256 public minVoteDuration; //min length of time (in seconds) that a proposal must be open for a vote
 
     uint256 public memberCount; //number of invited nfts from set that have been registered to the dao
-    mapping(uint256 => OGREDAOEnums.MemberStatus) private _members; //token id => member status
+    mapping(uint256 => IOGREDAO.MemberStatus) private _members; //token id => member status
     mapping(uint256 => bool) public memberAllowlist; //token id => isAllowed
     bool public allowListEnabled; //if true, only members in the allowlist can register
 
@@ -201,7 +202,7 @@ contract OGREDAO is ActionHopper {
      */
     function registerMember(uint256 tokenId) public {
         if (IERC721(nftAddress).ownerOf(tokenId) != msg.sender) revert InvalidSender(msg.sender, IERC721(nftAddress).ownerOf(tokenId));
-        if (_members[tokenId] == OGREDAOEnums.MemberStatus.REGISTERED) revert TokenAlreadyRegistered();
+        if (_members[tokenId] == IOGREDAO.MemberStatus.REGISTERED) revert TokenAlreadyRegistered();
 
         _registerMember(tokenId);
     }
@@ -211,7 +212,7 @@ contract OGREDAO is ActionHopper {
      * @param tokenId id of nft token to check
      * @return status status of member
      */
-    function getMemberStatus(uint256 tokenId) public view returns (OGREDAOEnums.MemberStatus) {
+    function getMemberStatus(uint256 tokenId) public view returns (IOGREDAO.MemberStatus) {
         return _members[tokenId];
     }
 
@@ -321,7 +322,7 @@ contract OGREDAO is ActionHopper {
     //========== Internal ==========
 
     function _registerMember(uint256 tokenId) internal {
-        _members[tokenId] = OGREDAOEnums.MemberStatus.REGISTERED;
+        _members[tokenId] = IOGREDAO.MemberStatus.REGISTERED;
         memberCount += 1;
 
         emit MemberRegistered(tokenId, msg.sender);

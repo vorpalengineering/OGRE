@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./interfaces/IOGREDAO.sol";
-import {OGREDAOEnums, OGREProposalEnums} from "./libraries/Enums.sol";
+import {OGREProposalEnums} from "./libraries/Enums.sol";
 import {IActionHopper} from "./interfaces/IActionHopper.sol";
 import {IOGREProposal} from "./interfaces/IOGREProposal.sol";
 import {IOGREDAO} from "./interfaces/IOGREDAO.sol";
@@ -60,7 +60,7 @@ contract OGREProposal is Ownable {
 
     error InvalidAddress(string variableName, address value);
     error InvalidProposalStatus(OGREProposalEnums.ProposalStatus currentStatus, OGREProposalEnums.ProposalStatus requiredStatus);
-    error InvalidMemberStatus(OGREDAOEnums.MemberStatus currentStatus, OGREDAOEnums.MemberStatus requiredStatus);
+    error InvalidMemberStatus(IOGREDAO.MemberStatus currentStatus, IOGREDAO.MemberStatus requiredStatus);
     error InvalidVoteDirection(OGREProposalEnums.VoteDirection vote);
     error InvalidTokenOwner(uint256 tokenId, address owner);
     error StartTimeInPast();
@@ -194,8 +194,8 @@ contract OGREProposal is Ownable {
     function castVote(uint256 tokenId, OGREProposalEnums.VoteDirection vote) public {
         //validate
         if (status != OGREProposalEnums.ProposalStatus.PROPOSED) revert InvalidProposalStatus(status, OGREProposalEnums.ProposalStatus.PROPOSED);
-        if (IOGREDAO(daoAddress).getMemberStatus(tokenId) != OGREDAOEnums.MemberStatus.REGISTERED) {
-            revert InvalidMemberStatus(IOGREDAO(daoAddress).getMemberStatus(tokenId), OGREDAOEnums.MemberStatus.REGISTERED);
+        if (IOGREDAO(daoAddress).getMemberStatus(tokenId) != IOGREDAO.MemberStatus.REGISTERED) {
+            revert InvalidMemberStatus(IOGREDAO(daoAddress).getMemberStatus(tokenId), IOGREDAO.MemberStatus.REGISTERED);
         }
         address nftAddress = IOGREDAO(daoAddress).nftAddress();
         if (IERC721(nftAddress).ownerOf(tokenId) != msg.sender) revert InvalidTokenOwner(tokenId, msg.sender);
