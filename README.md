@@ -1,8 +1,6 @@
-# Open Governance Referendum Engine
+# Open Governance Referendum Engine <img src="media/OGRELogo.png" alt="OGRE Logo" width="50" style="vertical-align: middle; margin-right: 10px"/> 
 
 A smart contract suite for actionable governance within NFT communities.
-
-<img src="media/OGRELogo.png" alt="OGRE Logo" width="100"/>
 
 # TODO
 
