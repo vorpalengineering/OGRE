@@ -204,7 +204,24 @@ contract OGREDAOTest is Test {
         vm.prank(user0);
         daoContract.registerMember(tokenId);
         vm.prank(user0);
-        vm.expectRevert(abi.encodeWithSelector(OGREDAO.TokenAlreadyRegistered.selector));
+        vm.expectRevert(abi.encodeWithSelector(OGREDAO.InvalidMemberStatus.selector));
+        daoContract.registerMember(tokenId);
+    }
+
+    function test_RevertIf_BannedMemberReregisters() public setupDAO(0) {
+        // Register member first
+        uint256 tokenId = 0;
+        vm.prank(user0);
+        daoContract.registerMember(tokenId);
+
+        // Set member status to BANNED (enum value 2) via vm.store
+        // _members mapping is at storage slot 6 (ActionHopper: 0=delay, 1=loadedActions; OGREDAO: 2=quorumThreshold, 3=supportThreshold, 4=minVoteDuration, 5=memberCount, 6=_members)
+        bytes32 slot = keccak256(abi.encode(uint256(tokenId), uint256(6)));
+        vm.store(address(daoContract), slot, bytes32(uint256(2))); // 2 = BANNED
+
+        // Attempt to re-register should revert
+        vm.prank(user0);
+        vm.expectRevert(abi.encodeWithSelector(OGREDAO.InvalidMemberStatus.selector));
         daoContract.registerMember(tokenId);
     }
 

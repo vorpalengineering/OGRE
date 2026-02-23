@@ -209,7 +209,7 @@ contract OGREDAO is IOGREDAO, ActionHopper {
      */
     function registerMember(uint256 tokenId) public {
         if (IERC721(nftAddress).ownerOf(tokenId) != msg.sender) revert InvalidSender(msg.sender, IERC721(nftAddress).ownerOf(tokenId));
-        if (_members[tokenId] == IOGREDAO.MemberStatus.REGISTERED) revert TokenAlreadyRegistered();
+        if (_members[tokenId] != IOGREDAO.MemberStatus.UNREGISTERED) revert InvalidMemberStatus();
 
         _registerMember(tokenId);
     }
