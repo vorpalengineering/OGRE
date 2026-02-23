@@ -100,6 +100,7 @@ contract OGREDAO is IOGREDAO, ActionHopper {
     error InvalidProposalState();
     error VotePeriodNotEnded();
     error NoActionsToExecute();
+    error NotAllowlisted(uint256 tokenId);
 
     //========== Constructor ==========
 
@@ -210,6 +211,7 @@ contract OGREDAO is IOGREDAO, ActionHopper {
     function registerMember(uint256 tokenId) public {
         if (IERC721(nftAddress).ownerOf(tokenId) != msg.sender) revert InvalidSender(msg.sender, IERC721(nftAddress).ownerOf(tokenId));
         if (_members[tokenId] != IOGREDAO.MemberStatus.UNREGISTERED) revert InvalidMemberStatus();
+        if (allowListEnabled && !memberAllowlist[tokenId]) revert NotAllowlisted(tokenId);
 
         _registerMember(tokenId);
     }

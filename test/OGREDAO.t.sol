@@ -96,6 +96,23 @@ contract OGREDAOTest is Test {
                 allowList: allowList,
                 initialMembers: initialMembers
             }));
+        } else if (configId == 2) {
+            // Deploy DAO with allowlist containing only token 0
+            uint256[] memory al = new uint256[](1);
+            al[0] = 0;
+            daoContract = new OGREDAO(IOGREDAO.ConstructorParams({
+                parentDAO: address(0x0),
+                nftAddress: address(nftContract),
+                proposalFactoryAddress: address(proposalFactoryContract),
+                proposalCost: proposalCost,
+                proposalCostToken: address(0x0),
+                quorumThreshold: quorumThresh,
+                supportThreshold: supportThresh,
+                minVoteDuration: minVotePeriod,
+                delay: delay,
+                allowList: al,
+                initialMembers: initialMembers
+            }));
         }
         _;
     }
@@ -240,6 +257,20 @@ contract OGREDAOTest is Test {
         assertEq(uint256(daoContract.getMemberStatus(tokenId)), 1);
     }
     
+    function test_RevertIf_NotAllowlisted() public setupDAO(2) {
+        uint256 tokenId = 1; // not on allowlist
+        vm.prank(user0);
+        vm.expectRevert(abi.encodeWithSelector(OGREDAO.NotAllowlisted.selector, tokenId));
+        daoContract.registerMember(tokenId);
+    }
+
+    function test_AllowlistedMemberCanRegister() public setupDAO(2) {
+        uint256 tokenId = 0; // on allowlist
+        vm.prank(user0);
+        daoContract.registerMember(tokenId);
+        assertEq(uint256(daoContract.getMemberStatus(tokenId)), uint256(IOGREDAO.MemberStatus.REGISTERED));
+    }
+
     // ========== Proposal Tests ==========
 
     function test_RevertIf_InsufficientNativePayment() public setupDAO(0) {
