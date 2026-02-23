@@ -12,7 +12,7 @@ import {IOGREDAO} from "./interfaces/IOGREDAO.sol";
  * @title Open Governance Referendum Engine Proposal Contract
  * @author Craig Branscom
  */
-contract OGREProposal is Ownable {
+contract OGREProposal is IOGREProposal, Ownable {
 
     //========== State ==========
 
@@ -28,7 +28,6 @@ contract OGREProposal is Ownable {
     uint256[3] public voteTotals; //[0, 0, 0] == no, yes, abstain
     mapping(uint256 => IOGREProposal.Vote) public votes; //token id => vote struct
     IActionHopper.Action[] internal _passActions; //actions to load (in order) if proposal passes
-    IActionHopper.Action[] internal _failActions; //actions to load (in order) if proposal fails
 
     //========== Events ==========
 
@@ -145,33 +144,23 @@ contract OGREProposal is Ownable {
 
     /**
      * @dev Sets actions for proposal. Ready time can be zero when added, gets ready time set when loaded into action hopper
-     * @param passActionQueue true if actions are for pass queue, false if actions are for fail queue
      * @param newActions actions to load (in order)
      */
     function setActions(
-        bool passActionQueue,
         IActionHopper.Action[] calldata newActions
     ) public onlyOwner onlyPreVote {
-        passActionQueue ? delete _passActions : delete _failActions;
-        if (newActions.length > 0) {
-            if (passActionQueue) {
-                for (uint256 i = 0; i < newActions.length; i++) {
-                    _passActions.push(newActions[i]);
-                }
-            } else {
-                for (uint256 i = 0; i < newActions.length; i++) {
-                    _failActions.push(newActions[i]);
-                }
-            }
+        delete _passActions;
+        for (uint256 i = 0; i < newActions.length; i++) {
+            _passActions.push(newActions[i]);
         }
     }
 
     /**
      * @dev Returns number of actions in proposal.
-     * @return uint256 of actions in proposal
+     * @return uint256 number of actions in proposal
      */
-    function getActionCount(bool passActionQueue) public view returns (uint256) {
-        return passActionQueue ? _passActions.length : _failActions.length;
+    function getActionCount() public view returns (uint256) {
+        return _passActions.length;
     }
 
     /**
@@ -179,8 +168,8 @@ contract OGREProposal is Ownable {
      * @param index index of action
      * @return Action action at index
      */
-    function getActionByIndex(bool passActionQueue, uint256 index) public view returns (IActionHopper.Action memory) {
-        return passActionQueue ? _passActions[index] : _failActions[index];
+    function getAction(uint256 index) public view returns (IActionHopper.Action memory) {
+        return _passActions[index];
     }
 
     //========== Voting ==========
@@ -245,15 +234,16 @@ contract OGREProposal is Ownable {
      * @param index index of action
      * @param readyTime ready time of action
      */
-    function setActionReady(bool passActionQueue, uint256 index, uint256 readyTime) external onlyDAO {
-        // require(getActionCount() > 0, "no actions to update");
-        // require(index <= getActionCount() - 1, "no action at index");
-        // require(readyTime > block.timestamp, "ready time must be in the future");
-        if (passActionQueue) {
-            _passActions[index].ready = readyTime;
-        } else {
-            _failActions[index].ready = readyTime;
-        }
+    function setActionReady(uint256 index, uint256 readyTime) external onlyDAO {
+        _passActions[index].ready = readyTime;
+    }
+
+    /**
+     * @dev Updates proposal status. Only callable by the DAO.
+     * @param newStatus new status of proposal
+     */
+    function updateStatus(IOGREProposal.ProposalStatus newStatus) external onlyDAO {
+        _updateStatus(newStatus);
     }
 
     //========== Internal ==========

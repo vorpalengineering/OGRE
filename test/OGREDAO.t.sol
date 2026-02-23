@@ -266,7 +266,7 @@ contract OGREDAOTest is Test {
         });
 
         vm.prank(user0);
-        proposalContract.setActions(true, passActions);
+        proposalContract.setActions(passActions);
 
         // Set vote period
         startTime = block.timestamp + 1;
@@ -295,34 +295,63 @@ contract OGREDAOTest is Test {
         assertFalse(daoContract.isProposal(user0));
     }
 
-    // function testEvaluateProposalPassed() public {
-    //     vm.prank(user0);
-    //     address propAddress = daoContract.draftProposal(proposalURI);
-    //     proposalContract = OGREProposal(propAddress);
+    function test_GovernanceLifecycle() public setupDAO(0) {
+        // Register members
+        for (uint256 i = 0; i < 10; i++) {
+            vm.prank(user0);
+            daoContract.registerMember(i);
+        }
 
-    //     // Setup proposalContract (similar to testDraftAndSetupProposal)
-    //     // ... (omitted for brevity, but should include the same setup)
+        // Fund DAO
+        vm.deal(address(daoContract), 1 ether);
 
-    //     vm.prank(user0);
-    //     bool passed = daoContract.evaluateProposal(propAddress);
-    //     assertTrue(passed);
-    //     assertEq(uint256(proposalContract.status()), 3); // passed
-    // }
+        // Draft proposal
+        vm.prank(user0);
+        address propAddress = daoContract.draftProposal(proposalURI);
+        proposalContract = OGREProposal(propAddress);
 
-    // function testExecuteProposal() public {
-    //     vm.prank(user0);
-    //     address propAddress = daoContract.draftProposal(proposalTitle);
-    //     proposalContract = OGREProposal(propAddress);
+        // Add action: send 0.5 ether to user1
+        IActionHopper.Action[] memory actions = new IActionHopper.Action[](1);
+        actions[0] = IActionHopper.Action({
+            target: user1,
+            value: 0.5 ether,
+            sig: "",
+            data: "",
+            ready: 0
+        });
 
-    //     // Setup proposalContract (similar to testDraftAndSetupProposal)
-    //     // ... (omitted for brevity, but should include the same setup)
+        vm.prank(user0);
+        proposalContract.setActions(actions);
 
-    //     // Wait until ready time
-    //     vm.warp(block.timestamp + delay + 1);
+        // Set vote period
+        startTime = block.timestamp + 1;
+        endTime = startTime + 300;
 
-    //     vm.prank(user0);
-    //     daoContract.executeProposal(propAddress);
+        vm.prank(user0);
+        proposalContract.setVotingPeriod(startTime, endTime);
 
-    //     assertEq(uint256(proposalContract.status()), 4); // executed
-    // }
+        // Advance to start time and vote
+        vm.warp(startTime);
+        for (uint256 i = 0; i < 10; i++) {
+            vm.prank(user0);
+            proposalContract.castVote(i, IOGREProposal.VoteDirection.YES);
+        }
+
+        // Advance past end time
+        vm.warp(endTime + 1);
+
+        // Evaluate proposal
+        bool passed = daoContract.evaluateProposal(propAddress);
+        assertTrue(passed);
+        assertEq(uint256(proposalContract.status()), uint256(IOGREProposal.ProposalStatus.PASSED));
+
+        // Wait for action delay
+        vm.warp(block.timestamp + delay + 1);
+
+        // Execute proposal
+        uint256 user1BalanceBefore = user1.balance;
+        daoContract.executeProposal(propAddress);
+        assertEq(uint256(proposalContract.status()), uint256(IOGREProposal.ProposalStatus.EXECUTED));
+        assertEq(user1.balance, user1BalanceBefore + 0.5 ether);
+    }
 } 

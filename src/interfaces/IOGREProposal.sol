@@ -51,7 +51,7 @@ interface IOGREProposal {
 
     //========== Functions ==========
 
-    function proposalTitle() external view returns (string memory);
+    function proposalURI() external view returns (string memory);
     function status() external view returns (ProposalStatus);
     function startTime() external view returns (uint256);
     function endTime() external view returns (uint256);
@@ -59,7 +59,6 @@ interface IOGREProposal {
     function getActionCount() external view returns (uint256);
     function getAction(uint256 index) external view returns (IActionHopper.Action memory);
 
-    function addAction(address target, uint256 value, string memory sig, bytes memory data) external;
-    function updateStatus(uint8 newStatus) external;
+    function updateStatus(ProposalStatus newStatus) external;
     function setActionReady(uint256 index, uint256 readyTime) external;
 }

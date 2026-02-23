@@ -277,18 +277,18 @@ contract OGREDAO is IOGREDAO, ActionHopper {
 
         if (supportPassed && quorumPassed) {
             //set proposal status to passed
-            IOGREProposal(proposal).updateStatus(3);
+            IOGREProposal(proposal).updateStatus(IOGREProposal.ProposalStatus.PASSED);
 
             //load actions into hopper
             uint256 actionCount = IOGREProposal(proposal).getActionCount();
-            for (uint8 i = 0; i < actionCount; i++) {
+            for (uint256 i = 0; i < actionCount; i++) {
                 IActionHopper.Action memory act = IOGREProposal(proposal).getAction(i);
                 act.ready = _loadAction(act.target, act.value, act.sig, act.data);
                 IOGREProposal(proposal).setActionReady(i, act.ready);
             }
         } else {
             //set proposal status to failed
-            IOGREProposal(proposal).updateStatus(2);
+            IOGREProposal(proposal).updateStatus(IOGREProposal.ProposalStatus.FAILED);
         }
 
         emit ProposalEvaluated(quorumPassed, supportPassed, totalVotes, quorumVotesThreshold, supportVotesThreshold);
@@ -305,11 +305,11 @@ contract OGREDAO is IOGREDAO, ActionHopper {
         if (IOGREProposal(proposal).getActionCount() == 0) revert NoActionsToExecute();
 
         //set proposal status to executed
-        IOGREProposal(proposal).updateStatus(4);
+        IOGREProposal(proposal).updateStatus(IOGREProposal.ProposalStatus.EXECUTED);
 
         //execute readied actions
         uint256 actionCount = IOGREProposal(proposal).getActionCount();
-        for (uint8 i = 0; i < actionCount; i++) {
+        for (uint256 i = 0; i < actionCount; i++) {
             IActionHopper.Action memory act = IOGREProposal(proposal).getAction(i);
             _executeAction(act.target, act.value, act.sig, act.data, act.ready);
         }
