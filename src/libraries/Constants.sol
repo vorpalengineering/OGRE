@@ -7,10 +7,7 @@ library Constants {
     bytes32 public constant DAO_ADMIN = keccak256("DAO_ADMIN"); //0xf591dda2e9b53c180cef2a1f29bc285ccc0649b7a0efc8de2ec0cfe024d46b96
     bytes32 public constant DAO_INVITE = keccak256("DAO_INVITE"); //0xf8450c7be9c60a2b1311317b8f68d216b82a7116d8d7c927eb7554832e0cb05a
 
-    //OGREMarket roles
-    bytes32 public constant MARKET_ADMIN = keccak256("MARKET_ADMIN"); //
-
-    //OGREOptions roles
+//OGREOptions roles
     bytes32 public constant OPTIONS_ADMIN = keccak256("OPTIONS_ADMIN"); //
 
     //OGREProposal roles
