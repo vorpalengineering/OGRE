@@ -271,6 +271,95 @@ contract OGREDAOTest is Test {
         assertEq(uint256(daoContract.getMemberStatus(tokenId)), uint256(IOGREDAO.MemberStatus.REGISTERED));
     }
 
+    // ========== Unregister Tests ==========
+
+    function test_UnregisterMember() public setupDAO(0) {
+        // Register member
+        uint256 tokenId = 0;
+        vm.prank(user0);
+        daoContract.registerMember(tokenId);
+        assertEq(daoContract.memberCount(), 1);
+        assertEq(uint256(daoContract.getMemberStatus(tokenId)), uint256(IOGREDAO.MemberStatus.REGISTERED));
+
+        // Unregister member as DAO
+        vm.prank(address(daoContract));
+        daoContract.unregisterMember(tokenId);
+
+        assertEq(daoContract.memberCount(), 0);
+        assertEq(uint256(daoContract.getMemberStatus(tokenId)), uint256(IOGREDAO.MemberStatus.UNREGISTERED));
+    }
+
+    function test_RevertIf_UnregisterMember_NotDAO() public setupDAO(0) {
+        // Register member
+        uint256 tokenId = 0;
+        vm.prank(user0);
+        daoContract.registerMember(tokenId);
+
+        // Attempt unregister as regular user
+        vm.prank(user0);
+        vm.expectRevert("caller must be dao");
+        daoContract.unregisterMember(tokenId);
+    }
+
+    function test_RevertIf_UnregisterMember_NotRegistered() public setupDAO(0) {
+        // Attempt to unregister a token that was never registered
+        uint256 tokenId = 0;
+        vm.prank(address(daoContract));
+        vm.expectRevert(abi.encodeWithSelector(OGREDAO.InvalidMemberStatus.selector));
+        daoContract.unregisterMember(tokenId);
+    }
+
+    // ========== Ban Tests ==========
+
+    function test_BanRegisteredMember() public setupDAO(0) {
+        // Register member
+        uint256 tokenId = 0;
+        vm.prank(user0);
+        daoContract.registerMember(tokenId);
+        assertEq(daoContract.memberCount(), 1);
+        assertEq(uint256(daoContract.getMemberStatus(tokenId)), uint256(IOGREDAO.MemberStatus.REGISTERED));
+
+        // Ban member as DAO
+        vm.prank(address(daoContract));
+        daoContract.banMember(tokenId);
+
+        assertEq(daoContract.memberCount(), 0);
+        assertEq(uint256(daoContract.getMemberStatus(tokenId)), uint256(IOGREDAO.MemberStatus.BANNED));
+    }
+
+    function test_BanUnregisteredMember() public setupDAO(0) {
+        // Ban an unregistered token as DAO
+        uint256 tokenId = 0;
+        uint256 preMemberCount = daoContract.memberCount();
+        assertEq(uint256(daoContract.getMemberStatus(tokenId)), uint256(IOGREDAO.MemberStatus.UNREGISTERED));
+
+        vm.prank(address(daoContract));
+        daoContract.banMember(tokenId);
+
+        assertEq(daoContract.memberCount(), preMemberCount);
+        assertEq(uint256(daoContract.getMemberStatus(tokenId)), uint256(IOGREDAO.MemberStatus.BANNED));
+    }
+
+    function test_RevertIf_BanMember_NotDAO() public setupDAO(0) {
+        uint256 tokenId = 0;
+        vm.prank(user0);
+        vm.expectRevert("caller must be dao");
+        daoContract.banMember(tokenId);
+    }
+
+    function test_RevertIf_BanMember_AlreadyBanned() public setupDAO(0) {
+        uint256 tokenId = 0;
+
+        // Ban once
+        vm.prank(address(daoContract));
+        daoContract.banMember(tokenId);
+
+        // Ban again — should revert
+        vm.prank(address(daoContract));
+        vm.expectRevert(abi.encodeWithSelector(OGREDAO.InvalidMemberStatus.selector));
+        daoContract.banMember(tokenId);
+    }
+
     // ========== Proposal Tests ==========
 
     function test_RevertIf_InsufficientNativePayment() public setupDAO(0) {

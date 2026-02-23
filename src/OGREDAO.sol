@@ -69,6 +69,18 @@ contract OGREDAO is IOGREDAO, ActionHopper {
      * @param proposalId unique proposal id assigned by dao
      * @param createdBy proposal creator
      */
+    /**
+     * @notice Logs a successful member unregistration
+     * @param tokenId id of nft token being unregistered from dao
+     */
+    event MemberUnregistered(uint256 indexed tokenId);
+
+    /**
+     * @notice Logs a successful member ban
+     * @param tokenId id of nft token being banned from dao
+     */
+    event MemberBanned(uint256 indexed tokenId);
+
     event ProposalCreated(address proposal, uint256 proposalId, address indexed createdBy);
 
     /**
@@ -223,6 +235,30 @@ contract OGREDAO is IOGREDAO, ActionHopper {
      */
     function getMemberStatus(uint256 tokenId) public view returns (IOGREDAO.MemberStatus) {
         return _members[tokenId];
+    }
+
+    /**
+     * @dev Unregisters a member from the dao. Can only be called by the DAO itself (via governance).
+     * @param tokenId id of nft token being unregistered from dao
+     */
+    function unregisterMember(uint256 tokenId) public onlyDAO {
+        if (_members[tokenId] != IOGREDAO.MemberStatus.REGISTERED) revert InvalidMemberStatus();
+        _members[tokenId] = IOGREDAO.MemberStatus.UNREGISTERED;
+        memberCount -= 1;
+        emit MemberUnregistered(tokenId);
+    }
+
+    /**
+     * @dev Bans a member from the dao. Can only be called by the DAO itself (via governance).
+     * @param tokenId id of nft token being banned from dao
+     */
+    function banMember(uint256 tokenId) public onlyDAO {
+        if (_members[tokenId] == IOGREDAO.MemberStatus.BANNED) revert InvalidMemberStatus();
+        if (_members[tokenId] == IOGREDAO.MemberStatus.REGISTERED) {
+            memberCount -= 1;
+        }
+        _members[tokenId] = IOGREDAO.MemberStatus.BANNED;
+        emit MemberBanned(tokenId);
     }
 
     //========== Proposals ==========

@@ -61,6 +61,9 @@ interface IOGREDAO {
     function proposals(uint256) external view returns (address);
     function isProposal(address proposal) external view returns (bool);
     
+    function unregisterMember(uint256 tokenId) external;
+    function banMember(uint256 tokenId) external;
+
     function setQuorumThreshold(uint256 newQuorumThreshold) external;
     function setSupportThreshold(uint256 newSupportThreshold) external;
     function setMinVoteDuration(uint256 newMinVoteDuration) external;
