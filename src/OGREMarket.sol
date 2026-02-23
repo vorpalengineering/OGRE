@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 import {Constants} from "./libraries/Constants.sol";
@@ -16,6 +17,7 @@ import {IOGREMarket} from "./interfaces/IOGREMarket.sol";
  * @title Open Governance Referendum Engine Market Contract
  */
 contract OGREMarket is IOGREMarket, AccessControl, ReentrancyGuard {
+    using SafeERC20 for IERC20;
 
     //========== State ==========
 
@@ -135,7 +137,7 @@ contract OGREMarket is IOGREMarket, AccessControl, ReentrancyGuard {
             delete orders[orderHash];
 
             //requires approval from erc20 holder
-            erc20Contract.transferFrom(erc20Holder, erc721Holder, amount);
+            erc20Contract.safeTransferFrom(erc20Holder, erc721Holder, amount);
 
             //requires approval from erc721 holder
             erc721Contract.safeTransferFrom(erc721Holder, erc20Holder, tokenId);
