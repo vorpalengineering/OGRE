@@ -402,4 +402,56 @@ contract OGREDAOTest is Test {
         assertEq(uint256(proposalContract.status()), uint256(IOGREProposal.ProposalStatus.EXECUTED));
         assertEq(user1.balance, user1BalanceBefore + 0.5 ether);
     }
+
+    function test_SupportThresholdUsesTotalVotes() public setupDAO(0) {
+        // Register 10 members
+        for (uint256 i = 0; i < 10; i++) {
+            vm.prank(user0);
+            daoContract.registerMember(i);
+        }
+
+        // Draft proposal
+        vm.prank(user0);
+        address propAddress = daoContract.draftProposal(proposalURI);
+        proposalContract = OGREProposal(propAddress);
+
+        // Add a no-op action
+        IActionHopper.Action[] memory actions = new IActionHopper.Action[](1);
+        actions[0] = IActionHopper.Action({
+            target: address(0),
+            value: 0,
+            sig: "",
+            data: "",
+            ready: 0
+        });
+
+        vm.prank(user0);
+        proposalContract.setActions(actions);
+
+        // Set vote period
+        startTime = block.timestamp + 1;
+        endTime = startTime + 300;
+
+        vm.prank(user0);
+        proposalContract.setVotingPeriod(startTime, endTime);
+
+        // Advance to start time
+        vm.warp(startTime);
+
+        // Only 6 of 10 members vote YES (partial participation)
+        // Quorum: 50% of 10 members = 5, need > 5, so 6 > 5 ✓
+        // Support (fixed): 60% of 6 total votes = 3.6 → 3, 6 > 3 ✓
+        // Support (old bug): 60% of 10 members = 6, 6 > 6 ✗ (would fail)
+        for (uint256 i = 0; i < 6; i++) {
+            vm.prank(user0);
+            proposalContract.castVote(i, IOGREProposal.VoteDirection.YES);
+        }
+
+        // Advance past end time
+        vm.warp(endTime + 1);
+
+        // Evaluate — should pass with the fix
+        bool passed = daoContract.evaluateProposal(propAddress);
+        assertTrue(passed);
+    }
 } 

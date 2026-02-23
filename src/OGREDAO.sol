@@ -262,7 +262,7 @@ contract OGREDAO is IOGREDAO, ActionHopper {
         uint256 totalVotes = noVotes + yesVotes + abstainVotes;
 
         uint256 quorumVotesThreshold = (memberCount * quorumThreshold) / PERCENTAGE_RESOLUTION;
-        uint256 supportVotesThreshold = (memberCount * supportThreshold) / PERCENTAGE_RESOLUTION;
+        uint256 supportVotesThreshold = (totalVotes * supportThreshold) / PERCENTAGE_RESOLUTION;
 
         bool supportPassed = false;
         bool quorumPassed = false;
