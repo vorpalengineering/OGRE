@@ -111,6 +111,7 @@ contract OGREDAOTest is Test {
     function test_SetNewQuorumThreshold() public setupDAO(0) {
         // Set new quorum threshold
         uint256 newQuorumThresh = 7000; // 70%
+        vm.prank(address(daoContract));
         daoContract.setQuorumThreshold(newQuorumThresh);
 
         // Check state
@@ -120,6 +121,7 @@ contract OGREDAOTest is Test {
     function test_SetNewSupportThreshold() public setupDAO(0) {
         // Set new support threshold
         uint256 newSupportThresh = 7000; // 70%
+        vm.prank(address(daoContract));
         daoContract.setSupportThreshold(newSupportThresh);
 
         // Check state
@@ -129,6 +131,7 @@ contract OGREDAOTest is Test {
     function test_SetNewMinVoteDuration() public setupDAO(0) {
         // Set new min vote duration
         uint256 newVoteDuration = 400; // 4 mins
+        vm.prank(address(daoContract));
         daoContract.setMinVoteDuration(newVoteDuration);
 
         // Check state
@@ -138,6 +141,7 @@ contract OGREDAOTest is Test {
     function test_SetNewProposalCost() public setupDAO(0) {
         // Set new proposal cost
         uint256 newProposalCost = 0.0001 ether;
+        vm.prank(address(daoContract));
         daoContract.setProposalCost(newProposalCost);
 
         // Check state
@@ -147,10 +151,41 @@ contract OGREDAOTest is Test {
     function test_SetNewActionDelay() public setupDAO(0) {
         // Set new action delay
         uint256 newDelay = 20; // 20 seconds
+        vm.prank(address(daoContract));
         daoContract.setActionDelay(newDelay);
 
         // Check state
         assertEq(daoContract.delay(), newDelay);
+    }
+
+    function test_RevertIf_SetQuorumThreshold_NotDAO() public setupDAO(0) {
+        vm.prank(user0);
+        vm.expectRevert("caller must be dao");
+        daoContract.setQuorumThreshold(7000);
+    }
+
+    function test_RevertIf_SetSupportThreshold_NotDAO() public setupDAO(0) {
+        vm.prank(user0);
+        vm.expectRevert("caller must be dao");
+        daoContract.setSupportThreshold(7000);
+    }
+
+    function test_RevertIf_SetMinVoteDuration_NotDAO() public setupDAO(0) {
+        vm.prank(user0);
+        vm.expectRevert("caller must be dao");
+        daoContract.setMinVoteDuration(400);
+    }
+
+    function test_RevertIf_SetProposalCost_NotDAO() public setupDAO(0) {
+        vm.prank(user0);
+        vm.expectRevert("caller must be dao");
+        daoContract.setProposalCost(0.0001 ether);
+    }
+
+    function test_RevertIf_SetActionDelay_NotDAO() public setupDAO(0) {
+        vm.prank(user0);
+        vm.expectRevert("caller must be dao");
+        daoContract.setActionDelay(20);
     }
 
     // ========== Membership Tests ==========
@@ -192,6 +227,7 @@ contract OGREDAOTest is Test {
 
     function test_RevertIf_InsufficientNativePayment() public setupDAO(0) {
         uint256 newProposalCost = 0.0001 ether;
+        vm.prank(address(daoContract));
         daoContract.setProposalCost(newProposalCost);
         vm.prank(user0);
         vm.expectRevert(abi.encodeWithSelector(OGREDAO.InsufficientPayment.selector, 0, newProposalCost));

@@ -145,13 +145,20 @@ contract OGREDAO is IOGREDAO, ActionHopper {
         emit DAOCreated(_params_.parentDAO, _params_.nftAddress, _params_.proposalFactoryAddress);
     }
 
+    //========== Access Control ==========
+
+    modifier onlyDAO() {
+        require(msg.sender == address(this), "caller must be dao");
+        _;
+    }
+
     //========== Configuration ==========
 
     /**
-     * @dev Sets new quorum threshold for dao. 
+     * @dev Sets new quorum threshold for dao.
      * @param newQuorumThreshold quorum percentage (e.g. 555 = 5.55%)
      */
-    function setQuorumThreshold(uint256 newQuorumThreshold) public {
+    function setQuorumThreshold(uint256 newQuorumThreshold) public onlyDAO {
         if (newQuorumThreshold > PERCENTAGE_RESOLUTION) revert InvalidThreshold(newQuorumThreshold);
         if (newQuorumThreshold == 0) revert InvalidThreshold(newQuorumThreshold);
 
@@ -162,7 +169,7 @@ contract OGREDAO is IOGREDAO, ActionHopper {
      * @dev Sets new support threshold for dao
      * @param newSupportThreshold support percentage (e.g. 555 = 5.55%)
      */
-    function setSupportThreshold(uint256 newSupportThreshold) public {
+    function setSupportThreshold(uint256 newSupportThreshold) public onlyDAO {
         if (newSupportThreshold > PERCENTAGE_RESOLUTION) revert InvalidThreshold(newSupportThreshold);
         if (newSupportThreshold == 0) revert InvalidThreshold(newSupportThreshold);
 
@@ -173,7 +180,7 @@ contract OGREDAO is IOGREDAO, ActionHopper {
      * @dev Sets new min vote duration for dao
      * @param newMinVoteDuration min time in seconds
      */
-    function setMinVoteDuration(uint256 newMinVoteDuration) public {
+    function setMinVoteDuration(uint256 newMinVoteDuration) public onlyDAO {
         minVoteDuration = newMinVoteDuration;
     }
 
@@ -181,7 +188,7 @@ contract OGREDAO is IOGREDAO, ActionHopper {
      * @dev Sets new proposal cost for dao
      * @param newProposalCost new proposal cost in wei
      */
-    function setProposalCost(uint256 newProposalCost) public {
+    function setProposalCost(uint256 newProposalCost) public onlyDAO {
         proposalCost = newProposalCost;
     }
 
@@ -189,7 +196,7 @@ contract OGREDAO is IOGREDAO, ActionHopper {
      * @dev Sets a new delay for action hopper
      * @param newDelay new delay value (in seconds)
      */
-    function setActionDelay(uint256 newDelay) public {
+    function setActionDelay(uint256 newDelay) public onlyDAO {
         if (newDelay == 0) revert InvalidDelay();
         _setDelay(newDelay);
     }
